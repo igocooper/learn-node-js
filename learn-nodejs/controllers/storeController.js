@@ -1,5 +1,20 @@
 const mongoose = require('mongoose');
 const Store = mongoose.model('Store');
+const multer = require('multer');
+const jimp = require('jimp');
+const uuid = require('uuid');
+
+const multerOptions = {
+    storage: multer.memoryStorage(),
+    fileFilter(req, file, next) {
+        isPhoto = file.mimetype.startsWith('image/');
+        if (isPhoto) {
+            next(null, true);
+        } else {
+            next( { message: 'Taht filetype isn\'t allowed'}, false);
+        } 
+    } 
+}
 
 exports.homePage = (req, res) => {
     res.render('index', {
@@ -11,6 +26,28 @@ exports.addStore = (req, res) => {
     res.render('editStore', {
         title: 'Add Store'
     });
+
+}
+
+// set middleware and tell it to deal with single "photo" field
+exports.upload = multer(multerOptions).single('photo');
+
+exports.resize = async (req, res, next) => {
+    // if there is no file to resize
+    if (!req.file) {
+        next(); // skip to next middleware
+        return;
+    }
+    console.log(req.file);
+
+    const extension = req.file.mimetype.split('/')[1];
+    req.body.photo = `${uuid.v4()}.${extension}`;
+    // resize photo
+    const photo = await jimp.read(req.file.buffer);
+    await photo.resize(800, jimp.AUTO);
+    await photo.write(`./public/uploads/${req.body.photo}`);
+    // go to next midleware once finished writing photo into our filesystem
+    next();
 
 }
 
