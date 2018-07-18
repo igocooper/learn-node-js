@@ -89,3 +89,15 @@ exports.editStore = async (req, res) => {
         store
     });
 }
+
+exports.getStoreBySlug = async (req, res, next) => {
+    const store = await Store.findOne({slug: req.params.slug});
+
+    if(!store) return next(); // handle 404 in case no store is found
+    
+
+    res.render('store', {
+        title: store.name,
+        store
+    });
+}
