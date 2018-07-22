@@ -23,6 +23,9 @@ mongoose.connection.on('error', (err) => {
 require('./models/Store');
 require('./models/User');
 
+// TEST EMAIL SENDING LIB
+require('./handlers/mail');
+
 // Start our app!
 const app = require('./app');
 app.set('port', process.env.PORT || 7777);
