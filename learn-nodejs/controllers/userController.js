@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
-// const User = mongoose.model('User');
+const User = mongoose.model('User');
 const uuid = require('uuid');
+const promisify = require('es6-promisify');
 
 
 exports.loginForm = (req, res) => {
@@ -42,5 +43,23 @@ exports.validaterRegister = (req, res, next) => {
         });
         return 
     }
+    next();
+};
+
+exports.register = async (req, res, next) => {
+    const user = new User({
+        email: req.body.email,
+        name: req.body.name
+    });
+
+    // promisifying User.register fn from passport-mongoose-local plugin 
+    // applied to out User schema, which is callback based
+    // fn promisify(method, context to Bind to)
+    const register = promisify(User.register, User); 
+    // now we can await it instead of User.register(user, req.body.password, function(){
+        // and write out code here  which might be an issue when it's nested
+    //});
+
+    await register(user, req.body.password);
     next();
 };

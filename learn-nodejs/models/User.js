@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 mongoose.Promise = global.Promise;
 const md5 = require('md5');
+const validator = require('validator');
 const mongoErrorHandler = require('mongoose-mongodb-errors');
 const passportLocalMongoose = require('passport-local-mongoose');
 
@@ -21,7 +22,7 @@ const userSchema = new Schema({
   }
 });
 
-userSchame.plugin(passportLocalMongoose, {usernameField: 'email'});
-userSchame.plugin(mongoErrorHandler); // to get prettier Errors from mongoDB
+userSchema.plugin(passportLocalMongoose, {usernameField: 'email'});
+userSchema.plugin(mongoErrorHandler); // to get prettier Errors from mongoDB
 
 module.exports = mongoose.model('User', userSchema);
