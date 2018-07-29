@@ -22,6 +22,7 @@ mongoose.connection.on('error', (err) => {
 // import all our models
 require('./models/Store');
 require('./models/User');
+require('./models/Review');
 
 // TEST EMAIL SENDING LIB
 require('./handlers/mail');
