@@ -168,33 +168,38 @@ exports.searchStores = async (req, res) => {
       res.json(stores);
 	}
 	
-	exports.mapPage = (req, res) => {
-		res.render('map', {
-			title: 'Map'
-		});
-	};
-	
-	exports.heartStore = async (req, res) => {
-		const hearts = req.user.hearts.map(obj => obj.toString());
-		const operator = hearts.includes(req.params.id) ? '$pull' : '$addToSet';
+exports.mapPage = (req, res) => {
+    res.render('map', {
+        title: 'Map'
+    });
+};
 
-		const user = await User
-			.findByIdAndUpdate(req.user._id, 
-				{[operator]: {hearts: req.params.id} },
-				{ new: true}
-			);
-		res.json(user);
-		
-	};
-	
-	exports.getHearts = async (req, res) => {
+exports.heartStore = async (req, res) => {
+    const hearts = req.user.hearts.map(obj => obj.toString());
+    const operator = hearts.includes(req.params.id) ? '$pull' : '$addToSet';
 
-		const stores = await Store.find({
-			_id: {$in : req.user.hearts }
-		});
-		res.render('stores', {
-			title: 'Hearted Stores',
-			stores
-		});
-		
-	};
+    const user = await User
+        .findByIdAndUpdate(req.user._id, 
+            {[operator]: {hearts: req.params.id} },
+            { new: true}
+        );
+    res.json(user);
+    
+};
+
+exports.getHearts = async (req, res) => {
+
+    const stores = await Store.find({
+        _id: {$in : req.user.hearts }
+    });
+    res.render('stores', {
+        title: 'Hearted Stores',
+        stores
+    });
+    
+};
+
+exports.getTopStores = async (req, res) => {
+    const stores = await Store.getTopStores();
+    res.render('topStores', {stores, title: '★ Top Stores'});
+}

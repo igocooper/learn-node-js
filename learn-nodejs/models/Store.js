@@ -78,6 +78,16 @@ storeSchema.pre('save', async function(next) {
     next();
 });
 
+function autopopulate(next) {
+    this.populate('reviews');
+    next();
+}
+
+storeSchema.pre('find', autopopulate);
+storeSchema.pre('findOne', autopopulate);
+
+// additional methods using mongoDb AGGRAGATION to retrieve specific data  
+
 storeSchema.statics.getTagList = function() {
     return this.aggregate([
         { $unwind: '$tags' },
@@ -85,6 +95,26 @@ storeSchema.statics.getTagList = function() {
         { $sort: { count: - 1 } }
     ]);
 };
+
+storeSchema.statics.getTopStores = function() {
+    return this.aggregate([
+        // Lookup Stores and populate their reviews
+        { $lookup: {from: 'reviews', localField: '_id', foreignField: 'store', as: 'reviews'} },
+        // filter for only items that have one or more reviews
+        { $match: {'reviews.1': {$exists: true} } },
+        // Add the average review field
+        { $project: {
+            photo: '$$ROOT.photo',
+            name: '$$ROOT.name',
+            slug: '$$ROOT.slug',
+            reviews: '$$ROOT.reviews',
+            averageRating: { $avg: '$reviews.rating'}
+        }},
+        // sort it by newly added field
+        { $sort: {averageRating: -1 }},
+        { $limit: 10}
+    ]);
+}
 
 // find reviews where stores _id property === reviews store porperty 
 
